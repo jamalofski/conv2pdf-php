@@ -1,0 +1,8 @@
+* text=auto eol=lf
+
+# Exclu de l'archive dist (composer require) : seuls src/, composer.json,
+# README.md et LICENSE sont installés chez l'utilisateur.
+/.gitattributes export-ignore
+/.github       export-ignore
+/.gitignore    export-ignore
+/tests         export-ignore

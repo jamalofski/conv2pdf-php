@@ -13,7 +13,7 @@
         { "name": "Jamal Tantaoui", "homepage": "https://tantaoui.com" }
     ],
     "require": {
-        "php": ">=8.0",
+        "php": "^8.0",
         "ext-curl": "*",
         "ext-json": "*"
     },

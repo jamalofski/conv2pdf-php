@@ -130,7 +130,9 @@ final class Conv2pdf
         $ok = curl_exec($ch);
         $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
         $err = curl_error($ch);
-        curl_close($ch);
+        // curl_close() est un no-op depuis PHP 8.0 et déprécié en 8.5 : on libère le
+        // handle par unset(), avant fclose() puisqu'il détient encore le descripteur.
+        unset($ch);
         fclose($fh);
 
         if ($ok === false) {
@@ -182,11 +184,11 @@ final class Conv2pdf
         $body = curl_exec($ch);
         if ($body === false) {
             $err = curl_error($ch);
-            curl_close($ch);
             throw new Conv2pdfException("Erreur réseau : $err", 0, null);
         }
         $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-        curl_close($ch);
+        // Pas de curl_close() : no-op depuis PHP 8.0, déprécié en 8.5. Le CurlHandle
+        // est libéré à la sortie de la fonction.
 
         $data = json_decode(is_string($body) ? $body : '', true);
         if ($status < 200 || $status >= 300) {

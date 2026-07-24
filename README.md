@@ -8,7 +8,7 @@ SDK PHP officiel de l'[API conv2pdf](https://conv2pdf.com/api/) : conversion et 
 composer require conv2pdf/php
 ```
 
-Prérequis : PHP 8.0+, extension `curl`. [Obtenez une clé API gratuite](https://conv2pdf.com/api/) (plan Dev : 300 conversions/mois, sans carte).
+Prérequis : PHP 8.0 à 8.5 (chaque version est testée en CI), extension `curl`. [Obtenez une clé API gratuite](https://conv2pdf.com/api/) (plan Dev : 300 conversions/mois, sans carte).
 
 ## Démarrage rapide
 
