@@ -1,7 +1,7 @@
 * text=auto eol=lf
 
-# Exclu de l'archive dist (composer require) : seuls src/, composer.json,
-# README.md et LICENSE sont installés chez l'utilisateur.
+# Kept out of the dist archive (composer require): users only get src/,
+# composer.json, README.md and LICENSE.
 /.gitattributes export-ignore
 /.github       export-ignore
 /.gitignore    export-ignore

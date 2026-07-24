@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Conv2pdf;
 
 /**
- * Erreur renvoyée par le client conv2pdf : erreur API (4xx/5xx) ou réseau.
+ * Error returned by the conv2pdf client: an API error (4xx/5xx) or a network error.
  */
 class Conv2pdfException extends \RuntimeException
 {
@@ -20,7 +20,7 @@ class Conv2pdfException extends \RuntimeException
     }
 
     /**
-     * Code HTTP de la réponse (ex. 401, 415, 422, 429). 0 en cas d'erreur réseau.
+     * HTTP status of the response (e.g. 401, 415, 422, 429). 0 on a network error.
      */
     public function getStatus(): int
     {
@@ -28,8 +28,8 @@ class Conv2pdfException extends \RuntimeException
     }
 
     /**
-     * Code d'erreur stable renvoyé par l'API (ex. 'missing_bearer_token',
-     * 'pdf_scanned_needs_ocr', 'quota_exceeded'), ou null si indisponible.
+     * Stable error code returned by the API (e.g. 'missing_bearer_token',
+     * 'pdf_scanned_needs_ocr', 'quota_exceeded'), or null when unavailable.
      */
     public function getErrorCode(): ?string
     {

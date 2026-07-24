@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Conv2pdf;
 
 /**
- * Client PHP de l'API conv2pdf — conversion et manipulation de PDF, hébergée en France.
+ * PHP client for the conv2pdf API — PDF conversion and manipulation, hosted in France.
  *
- * Exemple :
+ * Example:
  *   $c = new Conv2pdf('cpdf_live_...');
- *   $job = $c->convert('pdf-to-word', 'rapport.pdf');
- *   $c->download($job['download_url'], 'sortie.docx');
+ *   $job = $c->convert('pdf-to-word', 'report.pdf');
+ *   $c->download($job['download_url'], 'report.docx');
  *
- * Zéro dépendance (ext-curl uniquement). Contrat REST : https://conv2pdf.com/openapi.json
+ * Zero dependencies (ext-curl only). REST contract: https://conv2pdf.com/openapi.json
  */
 final class Conv2pdf
 {
@@ -21,14 +21,14 @@ final class Conv2pdf
     private int $timeout;
 
     /**
-     * @param string $apiKey  Clé API au format cpdf_live_... (tableau de bord conv2pdf).
-     * @param string $baseUrl Racine de l'API (par défaut la production).
-     * @param int    $timeout Timeout des requêtes, en secondes.
+     * @param string $apiKey  API key in the cpdf_live_... format (from the conv2pdf dashboard).
+     * @param string $baseUrl API root (defaults to production).
+     * @param int    $timeout Request timeout, in seconds.
      */
     public function __construct(string $apiKey, string $baseUrl = 'https://api.conv2pdf.com/v1', int $timeout = 120)
     {
         if ($apiKey === '') {
-            throw new \InvalidArgumentException('Clé API requise.');
+            throw new \InvalidArgumentException('API key required.');
         }
         $this->apiKey = $apiKey;
         $this->baseUrl = rtrim($baseUrl, '/');
@@ -36,7 +36,7 @@ final class Conv2pdf
     }
 
     /**
-     * Liste des outils disponibles, leurs bornes de fichiers et extensions acceptées.
+     * Lists the available tools, their file size limits and accepted extensions.
      *
      * @return array{tools: array<int, array<string, mixed>>}
      */
@@ -46,30 +46,30 @@ final class Conv2pdf
     }
 
     /**
-     * Convertit ou manipule un fichier via POST /convert/{tool}.
+     * Converts or manipulates a file through POST /convert/{tool}.
      *
-     * @param string          $tool   Identifiant de l'outil (ex. 'pdf-to-word', 'merge-pdf', 'compress-pdf').
-     * @param string|string[] $files  Chemin du fichier, ou tableau de chemins (merge-pdf : 2 à 20 fichiers).
-     * @param array<string, string|int> $fields  Champs additionnels selon l'outil, ex. ['ranges' => '1-5'],
+     * @param string          $tool   Tool identifier (e.g. 'pdf-to-word', 'merge-pdf', 'compress-pdf').
+     * @param string|string[] $files  A file path, or an array of paths (merge-pdf: 2 to 20 files).
+     * @param array<string, string|int> $fields  Extra fields, depending on the tool, e.g. ['ranges' => '1-5'],
      *                                            ['quality' => 'high'], ['password' => '...'], ['rotation' => 90].
      * @return array{job_id: string, status: string, download_url: string, size_bytes: int, quota?: array<string, mixed>}
-     * @throws Conv2pdfException En cas d'erreur API (4xx/5xx) ou réseau.
-     * @throws \InvalidArgumentException Si aucun fichier n'est fourni ou qu'un chemin est introuvable.
+     * @throws Conv2pdfException On an API error (4xx/5xx) or a network error.
+     * @throws \InvalidArgumentException If no file is given, or a path does not exist.
      */
     public function convert(string $tool, $files, array $fields = []): array
     {
         $paths = is_array($files) ? array_values($files) : [$files];
         if ($paths === []) {
-            throw new \InvalidArgumentException('Au moins un fichier est requis.');
+            throw new \InvalidArgumentException('At least one file is required.');
         }
 
         $post = [];
         foreach ($paths as $i => $path) {
             if (!is_string($path) || !is_file($path)) {
-                throw new \InvalidArgumentException('Fichier introuvable : ' . (is_string($path) ? $path : gettype($path)));
+                throw new \InvalidArgumentException('File not found: ' . (is_string($path) ? $path : gettype($path)));
             }
-            // Le serveur collecte toutes les parts « fichier » quel que soit leur nom de champ.
-            // Un seul fichier → champ « file » ; plusieurs (merge) → « file[0] », « file[1] »…
+            // The server collects every file part, whatever the field name.
+            // A single file goes to "file"; several (merge) go to "file[0]", "file[1]"…
             $key = count($paths) === 1 ? 'file' : "file[$i]";
             $post[$key] = new \CURLFile($path);
         }
@@ -81,9 +81,9 @@ final class Conv2pdf
     }
 
     /**
-     * Métadonnées d'un job terminé (GET /job/{jobId}) : tool, taille, dates, download_url.
-     * Les conversions étant synchrones, convert() lève directement en cas d'échec ; un job
-     * non abouti renvoie 409. Utile surtout pour re-vérifier l'expiration avant téléchargement.
+     * Metadata for a finished job (GET /job/{jobId}): tool, size, dates, download_url.
+     * Conversions are synchronous, so convert() throws straight away on failure and an
+     * unfinished job returns 409. Mostly useful to re-check expiry before downloading.
      *
      * @return array<string, mixed>
      * @throws Conv2pdfException
@@ -94,7 +94,7 @@ final class Conv2pdf
     }
 
     /**
-     * Supprime un job et son fichier (DELETE /job/{jobId}).
+     * Deletes a job and its file (DELETE /job/{jobId}).
      *
      * @return array<string, mixed>
      * @throws Conv2pdfException
@@ -105,20 +105,20 @@ final class Conv2pdf
     }
 
     /**
-     * Télécharge le résultat d'une conversion vers un fichier local (GET /download/{jobId}).
-     * Disponible une heure après la conversion.
+     * Downloads the result of a conversion to a local file (GET /download/{jobId}).
+     * Available for one hour after the conversion.
      *
-     * @param string $jobIdOrUrl Le download_url renvoyé par convert(), ou un job_id nu.
-     * @param string $destPath   Chemin de destination local.
-     * @throws Conv2pdfException En cas d'erreur API/réseau (le fichier partiel est supprimé).
-     * @throws \RuntimeException Si le fichier de destination ne peut pas être ouvert en écriture.
+     * @param string $jobIdOrUrl The download_url returned by convert(), or a bare job_id.
+     * @param string $destPath   Local destination path.
+     * @throws Conv2pdfException On an API or network error (the partial file is removed).
+     * @throws \RuntimeException If the destination file cannot be opened for writing.
      */
     public function download(string $jobIdOrUrl, string $destPath): void
     {
         $url = $this->resolveDownloadUrl($jobIdOrUrl);
         $fh = fopen($destPath, 'wb');
         if ($fh === false) {
-            throw new \RuntimeException("Impossible d'écrire le fichier de destination : $destPath");
+            throw new \RuntimeException("Cannot open destination file for writing: $destPath");
         }
 
         $ch = curl_init($url);
@@ -130,18 +130,18 @@ final class Conv2pdf
         $ok = curl_exec($ch);
         $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
         $err = curl_error($ch);
-        // curl_close() est un no-op depuis PHP 8.0 et déprécié en 8.5 : on libère le
-        // handle par unset(), avant fclose() puisqu'il détient encore le descripteur.
+        // curl_close() has been a no-op since PHP 8.0 and is deprecated in 8.5, so the
+        // handle is released with unset() — before fclose(), as it still holds the stream.
         unset($ch);
         fclose($fh);
 
         if ($ok === false) {
             @unlink($destPath);
-            throw new Conv2pdfException("Erreur réseau au téléchargement : $err", 0, null);
+            throw new Conv2pdfException("Network error during download: $err", 0, null);
         }
         if ($status < 200 || $status >= 300) {
-            // Sur erreur, le corps JSON ({error:...}) a été écrit dans le fichier : on
-            // en extrait le code d'erreur avant de supprimer le fichier partiel.
+            // On error the JSON body ({error:...}) has been written to the file, so the
+            // error code is read back before the partial file is removed.
             $code = null;
             $errBody = @file_get_contents($destPath);
             if ($errBody !== false) {
@@ -152,7 +152,7 @@ final class Conv2pdf
             }
             @unlink($destPath);
             throw new Conv2pdfException(
-                "Téléchargement échoué (HTTP $status)" . ($code !== null ? " : $code" : '') . '.',
+                "Download failed (HTTP $status)" . ($code !== null ? ": $code" : '') . '.',
                 $status,
                 $code
             );
@@ -160,7 +160,7 @@ final class Conv2pdf
     }
 
     /**
-     * @param array<string, mixed>|null $post Champs multipart (avec CURLFile) pour un POST, null sinon.
+     * @param array<string, mixed>|null $post Multipart fields (with CURLFile) for a POST, null otherwise.
      * @return array<string, mixed>
      * @throws Conv2pdfException
      */
@@ -177,36 +177,36 @@ final class Conv2pdf
             ],
         ]);
         if ($post !== null) {
-            // Tableau contenant un CURLFile → curl encode en multipart/form-data automatiquement.
+            // An array holding a CURLFile makes curl encode the body as multipart/form-data.
             curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
         }
 
         $body = curl_exec($ch);
         if ($body === false) {
             $err = curl_error($ch);
-            throw new Conv2pdfException("Erreur réseau : $err", 0, null);
+            throw new Conv2pdfException("Network error: $err", 0, null);
         }
         $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-        // Pas de curl_close() : no-op depuis PHP 8.0, déprécié en 8.5. Le CurlHandle
-        // est libéré à la sortie de la fonction.
+        // No curl_close(): a no-op since PHP 8.0, deprecated in 8.5. The CurlHandle is
+        // released when the function returns.
 
         $data = json_decode(is_string($body) ? $body : '', true);
         if ($status < 200 || $status >= 300) {
             $code = is_array($data) && isset($data['error']) ? (string) $data['error'] : null;
             throw new Conv2pdfException(
-                'Requête échouée (HTTP ' . $status . ')' . ($code !== null ? " : $code" : '') . '.',
+                'Request failed (HTTP ' . $status . ')' . ($code !== null ? ": $code" : '') . '.',
                 $status,
                 $code
             );
         }
         if (!is_array($data)) {
-            throw new Conv2pdfException("Réponse JSON invalide (HTTP $status).", $status, null);
+            throw new Conv2pdfException("Invalid JSON response (HTTP $status).", $status, null);
         }
         return $data;
     }
 
     /**
-     * Résout l'URL de téléchargement à partir d'un download_url (chemin ou absolu) ou d'un job_id nu.
+     * Resolves the download URL from a download_url (path or absolute) or a bare job_id.
      */
     private function resolveDownloadUrl(string $jobIdOrUrl): string
     {
@@ -214,7 +214,7 @@ final class Conv2pdf
             return $jobIdOrUrl;
         }
         if ($jobIdOrUrl !== '' && $jobIdOrUrl[0] === '/') {
-            // download_url renvoyé par l'API = chemin depuis la racine de l'hôte, ex. « /v1/download/abc ».
+            // The download_url returned by the API is a path from the host root, e.g. "/v1/download/abc".
             $p = parse_url($this->baseUrl);
             $origin = ($p['scheme'] ?? 'https') . '://' . ($p['host'] ?? '')
                 . (isset($p['port']) ? ':' . $p['port'] : '');

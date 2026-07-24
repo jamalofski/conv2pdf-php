@@ -23,5 +23,5 @@ jobs:
         run: composer validate --strict
       - name: Lint PHP files
         run: find src tests -name '*.php' -print0 | xargs -0 -n1 -t php -l
-      - name: Smoke test (échoue sur tout Deprecated/Warning/Notice)
+      - name: Smoke test (fails on any Deprecated/Warning/Notice)
         run: php -d error_reporting=E_ALL tests/smoke.php

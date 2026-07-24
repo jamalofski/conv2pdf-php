@@ -1,6 +1,6 @@
 # conv2pdf/php
 
-SDK PHP officiel de l'[API conv2pdf](https://conv2pdf.com/api/) : conversion et manipulation de PDF (14 outils), **hébergée en France**, RGPD, DPA fourni. Wrapper mince, **zéro dépendance** (uniquement `ext-curl`).
+Official PHP SDK for the [conv2pdf API](https://conv2pdf.com/api/): PDF conversion and manipulation (14 tools), **hosted in France**, GDPR-compliant, DPA provided. A thin wrapper with **zero dependencies** (`ext-curl` only).
 
 ## Installation
 
@@ -8,46 +8,46 @@ SDK PHP officiel de l'[API conv2pdf](https://conv2pdf.com/api/) : conversion et 
 composer require conv2pdf/php
 ```
 
-Prérequis : PHP 8.0 à 8.5 (chaque version est testée en CI), extension `curl`. [Obtenez une clé API gratuite](https://conv2pdf.com/api/) (plan Dev : 300 conversions/mois, sans carte).
+Requires PHP 8.0 to 8.5 (every version is covered by CI) and the `curl` extension. [Get a free API key](https://conv2pdf.com/api/) (Dev plan: 300 conversions per month, no card).
 
-## Démarrage rapide
+## Quick start
 
 ```php
 use Conv2pdf\Conv2pdf;
 
 $c = new Conv2pdf('cpdf_live_...');
 
-$job = $c->convert('pdf-to-word', 'rapport.pdf');
-$c->download($job['download_url'], 'rapport.docx');
+$job = $c->convert('pdf-to-word', 'report.pdf');
+$c->download($job['download_url'], 'report.docx');
 ```
 
-## Utilisation
+## Usage
 
-### Conversions avec options
+### Conversions with options
 
 ```php
-$c->convert('compress-pdf', 'gros.pdf', ['quality' => 'high']);      // low | medium | high
-$c->convert('split-pdf',    'doc.pdf',  ['ranges' => '1-5,7,10-12']);
-$c->convert('rotate-pdf',   'doc.pdf',  ['rotation' => 90]);          // 90 | 180 | 270
-$c->convert('watermark-pdf','doc.pdf',  ['text' => 'CONFIDENTIEL']);
-$c->convert('protect-pdf',  'doc.pdf',  ['password' => 'secret', 'prevent_print' => 'on']);
+$c->convert('compress-pdf', 'large.pdf', ['quality' => 'high']);      // low | medium | high
+$c->convert('split-pdf',    'doc.pdf',   ['ranges' => '1-5,7,10-12']);
+$c->convert('rotate-pdf',   'doc.pdf',   ['rotation' => 90]);          // 90 | 180 | 270
+$c->convert('watermark-pdf','doc.pdf',   ['text' => 'CONFIDENTIAL']);
+$c->convert('protect-pdf',  'doc.pdf',   ['password' => 'secret', 'prevent_print' => 'on']);
 ```
 
-### Fusion (2 à 20 fichiers)
+### Merging (2 to 20 files)
 
 ```php
 $job = $c->convert('merge-pdf', ['a.pdf', 'b.pdf', 'c.pdf']);
-$c->download($job['download_url'], 'fusion.pdf');
+$c->download($job['download_url'], 'merged.pdf');
 ```
 
 ### Jobs
 
 ```php
-$meta = $c->job($job['job_id']);     // métadonnées d'un job terminé (tool, taille, expiration)
-$c->deleteJob($job['job_id']);       // suppression immédiate (sinon purge auto à 1 h)
+$meta = $c->job($job['job_id']);     // metadata for a finished job (tool, size, expiry)
+$c->deleteJob($job['job_id']);       // delete now (otherwise purged automatically after 1 hour)
 ```
 
-### Liste des outils
+### Listing the tools
 
 ```php
 foreach ($c->tools()['tools'] as $tool) {
@@ -55,9 +55,9 @@ foreach ($c->tools()['tools'] as $tool) {
 }
 ```
 
-### Gestion des erreurs
+### Error handling
 
-Toute erreur API (4xx/5xx) ou réseau lève une `Conv2pdf\Conv2pdfException`.
+Every API error (4xx/5xx) and network error raises a `Conv2pdf\Conv2pdfException`.
 
 ```php
 use Conv2pdf\Conv2pdfException;
@@ -71,16 +71,18 @@ try {
 }
 ```
 
-## Confidentialité
+Match on `getErrorCode()` rather than on the message: error codes are part of the API contract, messages are not.
 
-Traitement sur des serveurs OVH en France, aucun service hors UE, pas de Cloud Act. Fichiers d'entrée et de sortie supprimés au bout d'une heure, aucun résultat mis en cache. DPA fourni sur demande.
+## Privacy
 
-## Ressources
+Processing runs on OVH servers in Gravelines, France. No US service, no transfer outside the EU, no Cloud Act. Input and output files are deleted after one hour and no result is ever cached. DPA provided on request.
 
-- Documentation : <https://conv2pdf.com/api/documentation/>
-- Spécification OpenAPI : <https://conv2pdf.com/openapi.json>
-- Collection Postman : <https://conv2pdf.com/conv2pdf.postman_collection.json>
+## Resources
 
-## Licence
+- Documentation: <https://conv2pdf.com/api/documentation/>
+- OpenAPI specification: <https://conv2pdf.com/openapi.json>
+- Postman collection: <https://conv2pdf.com/conv2pdf.postman_collection.json>
 
-MIT — voir [LICENSE](LICENSE).
+## License
+
+MIT — see [LICENSE](LICENSE).
