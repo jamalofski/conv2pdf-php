@@ -1,0 +1,23 @@
+{
+    "name": "conv2pdf/php",
+    "description": "SDK PHP officiel de l'API conv2pdf : conversion et manipulation de PDF, hébergée en France, RGPD, DPA fourni.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["pdf", "conversion", "convert", "conv2pdf", "api", "sdk", "rgpd", "gdpr", "docx", "merge"],
+    "homepage": "https://conv2pdf.com/api/",
+    "support": {
+        "docs": "https://conv2pdf.com/api/documentation/",
+        "source": "https://github.com/jamalofski/conv2pdf-php"
+    },
+    "authors": [
+        { "name": "Jamal Tantaoui", "homepage": "https://tantaoui.com" }
+    ],
+    "require": {
+        "php": ">=8.0",
+        "ext-curl": "*",
+        "ext-json": "*"
+    },
+    "autoload": {
+        "psr-4": { "Conv2pdf\\": "src/" }
+    }
+}
