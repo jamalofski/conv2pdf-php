@@ -25,3 +25,42 @@ jobs:
         run: find src tests -name '*.php' -print0 | xargs -0 -n1 -t php -l
       - name: Smoke test (fails on any Deprecated/Warning/Notice)
         run: php -d error_reporting=E_ALL tests/smoke.php
+
+  release:
+    name: GitHub release
+    # Only on a v* tag, and only once the whole 8.0-8.5 matrix is green: a tag
+    # that fails CI must not produce a release.
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists, nothing to do."
+            exit 0
+          fi
+
+          if [ "$(git cat-file -t "$TAG")" = "tag" ]; then
+            # Annotated tag: its message is the changelog. Co-author trailers are
+            # commit metadata, not release notes.
+            {
+              git tag -l --format='%(contents:subject)' "$TAG"
+              printf '\n'
+              git tag -l --format='%(contents:body)' "$TAG"
+            } | grep -v '^Co-Authored-By:' > notes.md || true
+            gh release create "$TAG" --title "$TAG" --notes-file notes.md
+          else
+            # Lightweight tag: no message to read, so let GitHub build the notes.
+            gh release create "$TAG" --title "$TAG" --generate-notes
+          fi
