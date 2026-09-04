@@ -25,6 +25,8 @@ jobs:
         run: find src tests -name '*.php' -print0 | xargs -0 -n1 -t php -l
       - name: Smoke test (fails on any Deprecated/Warning/Notice)
         run: php -d error_reporting=E_ALL tests/smoke.php
+      - name: Functional test against a local stub of the API (fails on any Deprecated/Warning/Notice)
+        run: php -d error_reporting=E_ALL tests/functional.php
 
   release:
     name: GitHub release
