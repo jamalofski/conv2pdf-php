@@ -53,6 +53,13 @@ jobs:
             exit 0
           fi
 
+          # actions/checkout fetches the pushed ref by its COMMIT sha into refs/tags/$TAG,
+          # which turns an annotated tag into a lightweight one (actions/checkout#290):
+          # `git cat-file -t` then says "commit" and the tag message is never read. v1.2.0
+          # shipped with generated notes for that reason. Re-fetching the tag ref itself
+          # restores the tag object; --force because the ref already exists.
+          git fetch --force --no-tags origin "+refs/tags/$TAG:refs/tags/$TAG"
+
           if [ "$(git cat-file -t "$TAG")" = "tag" ]; then
             # Annotated tag: its message is the changelog. Co-author trailers are
             # commit metadata, not release notes.
