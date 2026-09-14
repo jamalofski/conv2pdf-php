@@ -64,7 +64,9 @@ class Conv2pdfException extends \RuntimeException
      *   - 415 unsupported_content: `detected_type`; 415 unsupported_media_type: `received`, `accepted`;
      *   - 409 job_not_ready: `status` (pending / failed / rejected);
      *   - 429 quota_exceeded: `quota`, `used`, `soft_cap_limit`, `quota_period_end` (next reset,
-     *     millisecond timestamp); 429 rate_limited: `retry_after`, `limit`;
+     *     millisecond timestamp, null on the Dev trial, which never renews — `period_end` is
+     *     null there too, and `upgrade` carries the plan that reopens access);
+     *     429 rate_limited: `retry_after`, `limit`;
      *   - 402 plan_limit_files: `max_allowed`.
      * Empty on a network error, or when the body is not JSON.
      *
@@ -79,7 +81,8 @@ class Conv2pdfException extends \RuntimeException
      * Seconds to wait before retrying, from the Retry-After header. The API sets it on its
      * transient refusals: 429 rate_limited (per-minute rate exceeded) and 503 server_busy.
      * Null otherwise, including on 429 quota_exceeded, where the next reset is
-     * `quota_period_end` in getPayload().
+     * `quota_period_end` in getPayload() — itself null on the Dev trial, whose credits
+     * never come back: there, the way out is `upgrade`, not a wait.
      */
     public function getRetryAfter(): ?int
     {

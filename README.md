@@ -113,7 +113,7 @@ Match on `getErrorCode()` rather than on the message: error codes are part of th
 | 415 | `unsupported_media_type` | `received`, `accepted`: the request was not `multipart/form-data` |
 | 422 | `empty_file`, `password_protected`, `pdf_scanned_needs_ocr`, `pdf_too_many_pages`, … | A verdict on the file itself |
 | 429 | `rate_limited` | `retry_after`, `limit`: 20 conversions per minute per key; `getRetryAfter()` is set |
-| 429 | `quota_exceeded` | `quota`, `used`, `quota_period_end` (next reset, millisecond timestamp); not transient |
+| 429 | `quota_exceeded` | `quota`, `used`, `quota_period_end` (next reset, millisecond timestamp) — **`null` on the free Dev trial**, which never renews, along with `period_end`; read `upgrade` instead; not transient |
 | 503 | `server_busy` | Queue saturated; `getRetryAfter()` is set |
 
 The full table is in the [API documentation](https://conv2pdf.com/api/documentation/).
@@ -128,7 +128,12 @@ try {
     } elseif ($e->getErrorCode() === 'file_too_large' && isset($e->getPayload()['upgrade'])) {
         $offer = $e->getPayload()['upgrade'];   // ['plan' => 'starter', 'price_eur_month' => 9, 'max_bytes' => ..., 'url' => ...]
     } elseif ($e->getErrorCode() === 'quota_exceeded') {
-        $resetAt = intdiv((int) $e->getPayload()['quota_period_end'], 1000);   // Unix timestamp of the next reset
+        $nextReset = $e->getPayload()['quota_period_end'] ?? null;             // null on the Dev trial: nothing resets
+        if ($nextReset === null) {
+            $offer = $e->getPayload()['upgrade'];   // ['plan' => 'starter', 'price_eur_month' => 9, 'quota' => 1000, 'url' => ...]
+        } else {
+            $resetAt = intdiv((int) $nextReset, 1000);   // Unix timestamp of the next reset
+        }
     } else {
         throw $e;
     }

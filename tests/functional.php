@@ -130,7 +130,20 @@ $e = $refused('429 quota_exceeded', function () use ($c, $pdf): void { $c->conve
 if ($e !== null) {
     $check('quota_exceeded: code', $e->getErrorCode() === 'quota_exceeded', $e->getErrorCode());
     $check('quota_exceeded: not transient', !$e->isTransient() && $e->getRetryAfter() === null, $e->getRetryAfter());
-    $check('quota_exceeded: quota_period_end in the payload', ($e->getPayload()['quota_period_end'] ?? null) === 1790000000000, $e->getPayload());
+    // Dev trial: both dates null. The point is that they are PRESENT and null, not
+    // absent — an integrator reading them with (int) would compute a 1970 reset and
+    // hammer the API. The upgrade offer is what replaces them.
+    $check('quota_exceeded (dev): both dates present and null',
+        array_key_exists('quota_period_end', $e->getPayload()) && $e->getPayload()['quota_period_end'] === null
+        && array_key_exists('period_end', $e->getPayload()) && $e->getPayload()['period_end'] === null, $e->getPayload());
+    $check('quota_exceeded (dev): upgrade offer instead of a reset date',
+        ($e->getPayload()['upgrade']['plan'] ?? null) === 'starter', $e->getPayload());
+}
+
+$e = $refused('429 quota_exceeded (paid)', function () use ($c, $pdf): void { $c->convert('quota-paid', $pdf); });
+if ($e !== null) {
+    $check('quota_exceeded (paid): quota_period_end in the payload', ($e->getPayload()['quota_period_end'] ?? null) === 1790000000000, $e->getPayload());
+    $check('quota_exceeded (paid): no upgrade offer needed', !isset($e->getPayload()['upgrade']), $e->getPayload());
 }
 
 $e = $refused('413 file_too_large', function () use ($c, $pdf): void { $c->convert('too-large', $pdf); });

@@ -96,8 +96,20 @@ if (preg_match('#^/v1/convert/([a-z0-9-]+)$#', $path, $m) && $method === 'POST')
             json(429, ['error' => 'rate_limited', 'retry_after' => 7, 'limit' => 20], ['Retry-After: 7']);
             return;
         case 'quota':
+            // Dev plan: a one-off trial of 300 conversions. Nothing renews and nothing is
+            // billed, so BOTH dates are null and `upgrade` is the only way back in. Copied
+            // from what the API actually sends — a fixture carrying dates here would have let
+            // the README recipe read a reset date that never comes.
             json(429, [
                 'error' => 'quota_exceeded', 'plan' => 'dev', 'quota' => 300, 'used' => 330, 'soft_cap_limit' => 330,
+                'period_end' => null, 'quota_period_end' => null,
+                'upgrade' => ['plan' => 'starter', 'price_eur_month' => 9, 'quota' => 1000, 'url' => 'https://conv2pdf.com/api/tarifs/'],
+            ]);
+            return;
+        case 'quota-paid':
+            // Paid plan: monthly quota on an anniversary cycle, both dates set.
+            json(429, [
+                'error' => 'quota_exceeded', 'plan' => 'starter', 'quota' => 1000, 'used' => 1100, 'soft_cap_limit' => 1100,
                 'period_end' => 1790000000000, 'quota_period_end' => 1790000000000,
             ]);
             return;
