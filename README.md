@@ -8,7 +8,7 @@ Official PHP SDK for the [conv2pdf API](https://conv2pdf.com/api/): PDF conversi
 composer require conv2pdf/php
 ```
 
-Requires PHP 8.0 to 8.5 (every version is covered by CI) and the `curl` extension. [Get a free API key](https://conv2pdf.com/api/) (Dev plan: 300 conversions per month, no card).
+Requires PHP 8.0 to 8.5 (every version is covered by CI) and the `curl` extension. [Get a free API key](https://conv2pdf.com/api/) (Dev plan: 300 free conversions at signup, valid 12 months, no card).
 
 ## Quick start
 
@@ -44,10 +44,10 @@ $c->download($job['download_url'], 'merged.pdf');
 
 The API bounds a request by plan, not by tool:
 
-| Plan | Per file | Files per merge | Conversions per month |
+| Plan | Per file | Files per merge | Conversions |
 |---|---|---|---|
-| Dev (free, no card) | 10 MB | 2 | 300 |
-| Starter, Growth, Business | 200 MB | up to 20 | 1,000 / 5,000 / 20,000 |
+| Dev (free, no card) | 10 MB | 2 | 300 at signup, **once** — valid 12 months, never renewed |
+| Starter, Growth, Business | 200 MB | up to 20 | 1,000 / 5,000 / 20,000 **per month** |
 
 Beyond them the API answers `413 file_too_large` or `402 plan_limit_files`; the 413 names the plan that would accept the file (see [Error handling](#error-handling)). Each tool's own bounds come from `tools()`.
 
