@@ -35,6 +35,12 @@ $c->convert('watermark-pdf','doc.pdf',   ['text' => 'CONFIDENTIAL']);
 $c->convert('protect-pdf',  'doc.pdf',   ['password' => 'secret', 'prevent_print' => 'on']);
 ```
 
+A PDF that asks for a password to open goes through the same `password` field, on `pdf-to-word`, `pdf-to-image`, `compress-pdf`, `split-pdf`, `rotate-pdf`, `watermark-pdf` and `page-numbers-pdf`. The result has no password:
+
+```php
+$c->convert('compress-pdf', 'statement.pdf', ['password' => 'its-password']);
+```
+
 ### Merging
 
 ```php
