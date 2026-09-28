@@ -1,6 +1,6 @@
 # conv2pdf/php
 
-Official PHP SDK for the [conv2pdf API](https://conv2pdf.com/api/): PDF conversion and manipulation (14 tools), **hosted in France**, GDPR-compliant, DPA provided. A thin wrapper with **zero dependencies** (`ext-curl` only).
+Official PHP SDK for the [conv2pdf API](https://conv2pdf.com/api/): PDF conversion and manipulation (15 tools), **hosted in France**, GDPR-compliant, DPA provided. A thin wrapper with **zero dependencies** (`ext-curl` only).
 
 ## Installation
 
@@ -20,6 +20,8 @@ $c = new Conv2pdf('cpdf_live_...');
 $job = $c->convert('pdf-to-word', 'report.pdf');
 $c->download($job['download_url'], 'report.docx');
 ```
+
+Every tool works the same way, an e-book included: `$c->convert('epub-to-pdf', 'book.epub')`.
 
 ## Usage
 
@@ -53,7 +55,7 @@ Beyond them the API answers `413 file_too_large` or `402 plan_limit_files`; the 
 
 ### File names and in-memory content
 
-The API identifies a file by its **content**, never by the extension of its name. The name only settles what the bytes cannot: `.doc`/`.xls`/`.ppt` share one container, and `.txt`/`.csv` are the same bytes rendered as a different document. So a temp file with no extension should be sent under a name that has one:
+The API identifies a file by its **content**, not by the extension of its name. The name only settles what the bytes cannot: `.doc`/`.xls`/`.ppt` share one container, `.txt`/`.csv` are the same bytes rendered as a different document, and an Apple Pages document looks like a Numbers spreadsheet, which is not converted. So a temp file with no extension should be sent under a name that has one:
 
 ```php
 $c->convert('office-to-pdf', ['path' => $tmpPath, 'name' => 'export.csv']);
