@@ -167,7 +167,7 @@ Every request carries `User-Agent: conv2pdf-php/<version> (PHP <version>)`. Ment
 
 ## Privacy
 
-Processing runs on OVH servers in Gravelines, France. No US service, no transfer outside the EU, no Cloud Act. Input and output files are deleted after one hour and no result is ever cached. DPA provided on request.
+Processing runs on OVHcloud servers in France. No US service, no transfer outside the EU, no Cloud Act. Input and output files are deleted after one hour and no result is ever cached. DPA provided on request.
 
 ## Resources
 
